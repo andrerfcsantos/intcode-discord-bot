@@ -6,13 +6,13 @@ import (
 
 // VM is an Intcode Virtual Machine
 type VM struct {
-	Memory Memory
-	Input  IntReader
-	Output IntWriter
-	MemoryLimit int
+	Memory           Memory
+	Input            IntReader
+	Output           IntWriter
+	MemoryLimit      int
 	InstructionLimit int
-	pc     int
-	b      int
+	pc               int
+	b                int
 }
 
 //
@@ -43,7 +43,7 @@ func (vm *VM) resolveAddress(accessMode AccessMode, address int) int {
 	case IMMEDIATE:
 		return address
 	case RELATIVE:
-		return vm.valAt(address)+vm.b
+		return vm.valAt(address) + vm.b
 	default:
 		fmt.Printf("WARNING: invalid address for mode '%v'", accessMode)
 		return 0
@@ -57,7 +57,7 @@ func (vm *VM) setValAt(address int, val int) {
 
 // valAt gets the value at a memory position. If the memory position doesn't exist, it is created
 // and initialized to 0
-func (vm *VM) valAt(address int) int{
+func (vm *VM) valAt(address int) int {
 	if _, ok := vm.Memory[address]; !ok {
 		vm.Memory[address] = 0
 	}
@@ -71,7 +71,7 @@ func (vm *VM) add(m1 AccessMode, m2 AccessMode, m3 AccessMode) error {
 	op2 := vm.valAt(vm.resolveAddress(m2, vm.pc+2))
 	dest := vm.resolveAddress(m3, vm.pc+3)
 
-	vm.setValAt(dest, op1 + op2)
+	vm.setValAt(dest, op1+op2)
 
 	vm.pc += 4
 	return nil
@@ -84,7 +84,7 @@ func (vm *VM) mul(m1 AccessMode, m2 AccessMode, m3 AccessMode) error {
 	op2 := vm.valAt(vm.resolveAddress(m2, vm.pc+2))
 	dest := vm.resolveAddress(m3, vm.pc+3)
 
-	vm.setValAt(dest, op1 * op2)
+	vm.setValAt(dest, op1*op2)
 	vm.pc += 4
 
 	return nil
@@ -151,7 +151,7 @@ func (vm *VM) less(m1 AccessMode, m2 AccessMode, m3 AccessMode) error {
 	}
 
 	address := vm.resolveAddress(m3, vm.pc+3)
-	vm.setValAt(address,flag)
+	vm.setValAt(address, flag)
 
 	vm.pc += 4
 
@@ -159,7 +159,7 @@ func (vm *VM) less(m1 AccessMode, m2 AccessMode, m3 AccessMode) error {
 }
 
 // equal operation
-func (vm *VM) eq(m1 AccessMode, m2 AccessMode,m3 AccessMode) error {
+func (vm *VM) eq(m1 AccessMode, m2 AccessMode, m3 AccessMode) error {
 
 	p1 := vm.valAt(vm.resolveAddress(m1, vm.pc+1))
 	p2 := vm.valAt(vm.resolveAddress(m2, vm.pc+2))
@@ -210,15 +210,17 @@ func (vm *VM) Run() (e error) {
 		case JMPFALSE:
 			err = vm.jmpfalse(opHeader.Op1Mode, opHeader.Op2Mode)
 		case LESS:
-			err = vm.less(opHeader.Op1Mode, opHeader.Op2Mode,opHeader.Op3Mode)
+			err = vm.less(opHeader.Op1Mode, opHeader.Op2Mode, opHeader.Op3Mode)
 		case EQ:
-			err = vm.eq(opHeader.Op1Mode, opHeader.Op2Mode,opHeader.Op3Mode)
+			err = vm.eq(opHeader.Op1Mode, opHeader.Op2Mode, opHeader.Op3Mode)
 		case HALT:
 			return nil
 		case BASE:
 			err = vm.base(opHeader.Op1Mode)
+		case 0:
+			return fmt.Errorf("unrecognized opcode '%d' found at pc '%v'. An opcode of 0 often means you forgot to include the halt instruction (opcode 99) in your program. Make sure to include an halt instruction when your program is done.", opHeader.Operation, vm.pc)
 		default:
-			return fmt.Errorf("unrecognized opcode '%v' found at pc '%v'", opHeader.Operation, vm.pc)
+			return fmt.Errorf("unrecognized opcode '%d' found at pc '%v'", opHeader.Operation, vm.pc)
 		}
 
 		executed++
@@ -228,11 +230,11 @@ func (vm *VM) Run() (e error) {
 		}
 
 		if vm.Memory.Len() >= vm.MemoryLimit {
-			return fmt.Errorf("max allowed memory reached for this vm (%d registers), halting the program",vm.MemoryLimit)
+			return fmt.Errorf("max allowed memory reached for this vm (%d registers), halting the program", vm.MemoryLimit)
 		}
 
-		if  executed >= vm.InstructionLimit {
-			return fmt.Errorf("max number of instructions reached for this vm (%d instructions), halting the program",vm.InstructionLimit)
+		if executed >= vm.InstructionLimit {
+			return fmt.Errorf("max number of instructions reached for this vm (%d instructions), halting the program", vm.InstructionLimit)
 		}
 	}
 

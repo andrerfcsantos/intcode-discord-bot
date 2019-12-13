@@ -1,8 +1,10 @@
 package main
 
 import (
-	"intcode-discord-bot/handlers"
 	"flag"
+	"fmt"
+	"intcode-discord-bot/handlers"
+	"io"
 	"log"
 	"os"
 	"os/signal"
@@ -31,6 +33,13 @@ func init() {
 func main() {
 	var err error
 
+	err = setOutput()
+
+	if err != nil {
+		fmt.Printf("error setting up logs: %v", err)
+		return
+	}
+
 	if BOT_TOKEN == "" {
 		log.Print("No bot token specified. Please specify one using the INTCODE_DISCORD_BOT_TOKEN environment variable or the -bot-token flag.")
 		return
@@ -58,4 +67,19 @@ func main() {
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
 
+}
+
+func setOutput() error {
+	err := os.MkdirAll("/var/log/intcode/", os.FileMode(0755))
+	if err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile("/var/log/intcode/bot.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	mw := io.MultiWriter(os.Stdout, file)
+	log.SetOutput(mw)
+	return nil
 }
