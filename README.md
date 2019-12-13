@@ -2,14 +2,12 @@
 
 Discord bot that allows you to run Intcode in Discord!
 
-Intcode an assembly-like language defined in the problems of [Advent of Code 2019](https://adventofcode.com/2019).
+Intcode is an assembly-like language defined in the problems of [Advent of Code 2019](https://adventofcode.com/2019).
 
 
-## Invite this bot to you discord
+## Invite this bot to your discord server
 
-Invite the bot to your server clicking [here](https://discordapp.com/api/oauth2/authorize?client_id=653389730813313031&permissions=124992&scope=bot)
-
-This is the easiest way to start using the bot.
+Invite the bot to your server clicking [here](https://discordapp.com/api/oauth2/authorize?client_id=653389730813313031&permissions=124992&scope=bot). This is the easiest way to start using the bot.
 
 ## Bot commands
 
